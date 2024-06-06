@@ -18,6 +18,8 @@ var loadShedding bool = true
 var useClientQueueLength bool = false
 var creditsOnFail bool = false
 
+var trackCredits bool = false
+
 /*
 DATA STRUCTURES:
 1. A global map of all active connections, which stores cIssued, cOC and cDemand
@@ -94,6 +96,7 @@ func InitBreakwater(param BWParameters) (bw *Breakwater) {
 	useClientTimeExpiration = param.UseClientTimeExpiration
 	loadShedding = param.LoadShedding
 	useClientQueueLength = param.UseClientQueueLength
+	trackCredits = param.TrackCredits
 	// unblock blocker
 	bw.noCreditBlocker <- 1
 	// give 1 credit to start

@@ -199,6 +199,7 @@ func (b *Breakwater) rttUpdate() {
 				b.queueingDelayChan <- DelayOperation{Value: newDelay}
 				// log the delay
 				logger("[RTT Update]: delay is %f", newDelay)
+				recordCredits("[Incremental Waiting Time Maximum]:	%f ms.\n", newDelay/1000)
 			}
 			prevCTotal := b.cTotal
 			b.lastUpdateTime = time.Now()
@@ -219,6 +220,7 @@ func (b *Breakwater) rttUpdate() {
 			// b.currGreatestDelay <- 0
 
 			logger("[Updating credits]: prev cTotal: %d, new cTotal: %d, cIssued: %d", prevCTotal, b.cTotal, totalIssued)
+			recordCredits("[Credit Update per RTT]: cTotal updated from %d to %d, cIssued: %d", prevCTotal, b.cTotal, totalIssued)
 			b.rttLock <- 1
 		}
 	}

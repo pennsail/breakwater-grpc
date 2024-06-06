@@ -22,6 +22,13 @@ func logger(format string, a ...interface{}) {
 	}
 }
 
+func recordCredits(format string, a ...interface{}) {
+	if trackCredits {
+		timestamp := time.Now().Format("2006-01-02T15:04:05.999999999-07:00")
+		fmt.Printf("LOG: "+timestamp+"|\t"+format+"\n", a...)
+	}
+}
+
 func min(a, b int64) int64 {
 	if a < b {
 		return a
@@ -52,6 +59,7 @@ type BWParameters struct {
 	LoadShedding            bool
 	UseClientQueueLength    bool
 	RTT_MICROSECOND         int64
+	TrackCredits            bool
 }
 
 /*
@@ -73,4 +81,5 @@ var BWParametersDefault BWParameters = BWParameters{
 	LoadShedding:            true,
 	UseClientQueueLength:    false,
 	RTT_MICROSECOND:         5000,
+	TrackCredits:            false,
 }
