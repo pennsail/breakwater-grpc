@@ -121,7 +121,7 @@ func InitBreakwater(param BWParameters) (bw *Breakwater) {
 		}
 	}
 
-	bw.startTimeoutRoutine(25 * time.Second)
+	bw.startTimeoutRoutine(time.Minute)
 	return
 }
 
