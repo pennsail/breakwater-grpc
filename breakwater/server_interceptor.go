@@ -374,32 +374,39 @@ func (b *Breakwater) UnaryInterceptor(ctx context.Context, req interface{}, info
 		return nil, errMissingMetadata
 	}
 
-	demand, err1 := strconv.ParseInt(md["demand"][0], 10, 64)
-	clientId, err2 := uuid.Parse(md["id"][0])
-	// reqId, err3 := uuid.Parse(md["reqid"][0])
+	// check if metadata has demand and id, if not, assume the client is not using breakwater! If so, jump to handler and bypass overload control
+	// if both are present, do the overload control
+	if _, ok := md["demand"]; ok {
+		if _, ok := md["id"]; ok {
+			logger("[Received Req]:	Received metadata")
 
-	if err1 != nil || err2 != nil {
-		logger("[Received Req]:	Error: malformed metadata")
-		return nil, errMissingMetadata
+			demand, err1 := strconv.ParseInt(md["demand"][0], 10, 64)
+			clientId, err2 := uuid.Parse(md["id"][0])
+			// reqId, err3 := uuid.Parse(md["reqid"][0])
+
+			if err1 != nil || err2 != nil {
+				logger("[Received Req]:	Error: malformed metadata")
+				return nil, errMissingMetadata
+			}
+
+			logger("[Received Req]:	ClientId: %s, Demand %d", clientId, demand)
+
+			// Register client if unregistered
+			b.RegisterClient(clientId, demand)
+
+			issuedCredits := b.updateCreditsToIssue(clientId, demand)
+			logger("[Received Req]:	issued credits is %d", issuedCredits)
+
+			// Piggyback updated credits issued
+			header := metadata.Pairs("credits", strconv.FormatInt(issuedCredits, 10))
+			// grpc.SendHeader(ctx, header)
+			// Set the header to be sent with the response or error
+			err := grpc.SetHeader(ctx, header)
+			if err != nil {
+				logger("Failed to set header: %v", err)
+			}
+		}
 	}
-
-	logger("[Received Req]:	ClientId: %s, Demand %d", clientId, demand)
-
-	// Register client if unregistered
-	b.RegisterClient(clientId, demand)
-
-	issuedCredits := b.updateCreditsToIssue(clientId, demand)
-	logger("[Received Req]:	issued credits is %d", issuedCredits)
-
-	// Piggyback updated credits issued
-	header := metadata.Pairs("credits", strconv.FormatInt(issuedCredits, 10))
-	// grpc.SendHeader(ctx, header)
-	// Set the header to be sent with the response or error
-	err := grpc.SetHeader(ctx, header)
-	if err != nil {
-		logger("Failed to set header: %v", err)
-	}
-
 	// Call the handler function to handle the request
 	logger("[Handling Req]:	Handling req")
 	m, err := handler(ctx, req)
