@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/google/uuid v1.3.0
 	google.golang.org/grpc v1.52.3
-	google.golang.org/grpc/examples v0.0.0-20230201212035-3151e834fa25
 )
 
 require (
