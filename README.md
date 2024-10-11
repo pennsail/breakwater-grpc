@@ -19,7 +19,7 @@ The `breakwater-grpc` package provides both client-side and server-side intercep
 
 #### Server Example
 
-```
+```go
 import (
 	"github.com/Jiali-Xing/breakwater-grpc"
 	"google.golang.org/grpc"
@@ -38,7 +38,7 @@ grpcServer.Serve(listener)
 
 #### Client Example
 
-```
+```go
 import (
 	"github.com/Jiali-Xing/breakwater-grpc"
 	"google.golang.org/grpc"
