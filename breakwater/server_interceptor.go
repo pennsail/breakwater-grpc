@@ -15,36 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-/*
-Register a client if it is not already registered
-Return the Connection object and a boolean indicating if the client is new
-loaded is true if the value was loaded instead of stored
-*/
-// func (b *Breakwater) RegisterClient(id uuid.UUID, demand int64) (Connection, bool) {
-
-// 	var c *Connection = &Connection{
-// 		issued:          0,
-// 		issuedWriteLock: make(chan int64, 1),
-// 		demand:          demand,
-// 		demandWriteLock: make(chan int64, 1),
-// 		id:              id,
-// 		lastUpdated:     make(chan time.Time, 1),
-// 	}
-// 	c.demandWriteLock <- 1
-// 	c.issuedWriteLock <- 1
-// 	// update to be before the last update time
-// 	c.lastUpdated <- time.Now().Add(-1 * time.Second)
-
-// 	storedConn, loaded := b.clientMap.LoadOrStore(id, *c)
-// 	if !loaded {
-// 		num := <-b.numClients
-// 		b.numClients <- num + 1
-// 	}
-
-// 	return storedConn.(Connection), loaded
-// }
-
-// Jiali: We need another fast function for server side interceptor to check and register client
+// We need another fast function for server side interceptor to check and register client
 func (b *Breakwater) RegisterClient(id uuid.UUID, demand int64) {
 	// Check if the client already exists, if so, return.
 	if _, exists := b.clientMap.Load(id); exists {
@@ -68,7 +39,6 @@ func (b *Breakwater) RegisterClient(id uuid.UUID, demand int64) {
 	b.clientMap.Store(id, c)
 	num := <-b.numClients
 	b.numClients <- num + 1
-	return
 }
 
 /*
@@ -171,7 +141,6 @@ func (b *Breakwater) getUpdatedTotalCredits() int64 {
 		logger("[Updating credits]: Within SLA")
 		addFactor := b.getAdditiveFactor()
 		return b.cTotal + addFactor
-		// b.cTotal += addFactor
 	} else {
 		logger("[Updating credits]: Beyond SLA, delay is %f threshold is %f", delay, b.thresholdDelay)
 		adjustingFactor := b.getMultiplicativeFactor(delay)
@@ -399,7 +368,6 @@ func (b *Breakwater) UnaryInterceptor(ctx context.Context, req interface{}, info
 
 			// Piggyback updated credits issued
 			header := metadata.Pairs("credits", strconv.FormatInt(issuedCredits, 10))
-			// grpc.SendHeader(ctx, header)
 			// Set the header to be sent with the response or error
 			err := grpc.SetHeader(ctx, header)
 			if err != nil {
@@ -419,58 +387,6 @@ func (b *Breakwater) UnaryInterceptor(ctx context.Context, req interface{}, info
 	}
 	return m, err
 }
-
-/*
-Used as a simple test for client side interceptors
-*/
-// func (b *Breakwater) DummyUnaryInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-// 	md, ok := metadata.FromIncomingContext(ctx)
-// 	if !ok {
-// 		return nil, errMissingMetadata
-// 	}
-
-// 	demand, err1 := strconv.ParseInt(md["demand"][0], 10, 64)
-// 	clientId, err2 := uuid.Parse(md["id"][0])
-// 	_, err3 := uuid.Parse(md["reqid"][0])
-
-// 	if err1 != nil || err2 != nil || err3 != nil {
-// 		logger("[Received Req]:	Error: malformed metadata")
-// 		return nil, errMissingMetadata
-// 	}
-
-// 	// logger("[Received Req]:	The demand is %d\n", demand)
-// 	logger("[Received Req]:	The clientid is %s\n", clientId)
-// 	// logger("[Received Req]:	reqid is %s\n", reqId)
-
-// 	// Register client if unregistered
-// 	conn, loaded := b.RegisterClient(clientId, demand)
-
-// 	// update credits issued
-// 	<-conn.issuedWriteLock
-// 	issuedCredits := conn.issued - 1
-// 	if !loaded {
-// 		issuedCredits = 3
-// 	}
-// 	if issuedCredits == 0 {
-// 		time.Sleep(1 * time.Second)
-// 		issuedCredits = 3
-// 	}
-// 	conn.issued = issuedCredits
-// 	b.clientMap.Store(clientId, conn)
-// 	logger("[Received Req]:	issued credits is %d\n", issuedCredits)
-
-// 	conn.issuedWriteLock <- 1
-// 	// Piggyback updated credits issued
-// 	header := metadata.Pairs("credits", strconv.FormatInt(issuedCredits, 10))
-// 	grpc.SendHeader(ctx, header)
-
-// 	m, err := handler(ctx, req)
-
-// 	if err != nil {
-// 		logger("RPC failed with error %v", err)
-// 	}
-// 	return m, err
-// }
 
 func (b *Breakwater) PrintOutgoingCredits() {
 	o := <-b.outgoingCredits

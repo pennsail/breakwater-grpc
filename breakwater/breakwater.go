@@ -156,10 +156,5 @@ func (b *Breakwater) startTimeoutRoutine(duration time.Duration) {
 		<-b.outgoingCredits
 		b.outgoingCredits <- 99999999
 		b.unblockNoCreditBlock()
-		// close channerls after all requests are unblocked and sent
-
-		// close(b.noCreditBlocker)
-		// close(b.outgoingCredits)
-		// close(b.pendingOutgoing)
 	}()
 }

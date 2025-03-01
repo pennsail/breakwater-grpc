@@ -60,26 +60,7 @@ func (b *Breakwater) unblockNoCreditBlock() {
 func (b *Breakwater) UnaryInterceptorClient(ctx context.Context, method string, req, reply interface{}, cc *grpc.ClientConn, invoker grpc.UnaryInvoker, opts ...grpc.CallOption) error {
 
 	// retrieve price table for downstream clients queueing delay
-	// var isDownstream bool = false
-	// var reqid uuid.UUID
 	timeStart := time.Now()
-	// var reqTimeData request
-	// md, ok := metadata.FromIncomingContext(ctx)
-	// if ok && len(md["reqid"]) > 0 {
-	// 	logger("[Before queue]:	is downstream request\n")
-	// 	// reqid, _ := uuid.Parse(md["reqid"][0])
-	// 	// r, ok := b.requestMap.Load(reqid)
-	// 	// isDownstream = true
-	// 	// if ok {
-	// 	// 	// should always be okay (the reqId should already be stored)
-	// 	// 	reqTimeData = r.(request)
-	// 	// } else {
-	// 	// 	b.requestMap.Store(reqid, request{reqid, 0})
-	// 	// }
-	// } else {
-	// 	// This is first upstream client / end user
-	// 	reqid = uuid.New()
-	// }
 
 	// Check if queue is too long
 	var added bool = b.queueRequest()

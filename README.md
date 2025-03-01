@@ -1,6 +1,6 @@
 # breakwater-grpc
 
-Breakwater-grpc is a gRPC implementation for the Breakwater microservice overload control framework, written in Go as a package for better generalizability. It is designed to control demand spikes with receiver-driven credit based rate limting, as demonstrated in the [breakwater paper](https://www.usenix.org/conference/osdi20/presentation/cho).
+Breakwater-grpc is an unofficial gRPC implementation for the Breakwater microservice overload control framework, written in Go as a package for better generalizability. It is designed to control demand spikes with receiver-driven credit based rate limting, as demonstrated in the [breakwater paper](https://www.usenix.org/conference/osdi20/presentation/cho).
 
 ## Impementation
 
@@ -11,7 +11,7 @@ In breakwater-grpc, delay is measured on the server-side via `/sched/latencies:s
 
 To use the breakwater-grpc package, you need to have Go installed on your system. You can then install the package using the following command:
 
-```go get -u github.com/Jiali-Xing/breakwater-grpc```
+```go get -u github.com/pennsail/breakwater-grpc```
 
 ## How to use
 
@@ -21,7 +21,7 @@ The `breakwater-grpc` package provides both client-side and server-side intercep
 
 ```go
 import (
-	"github.com/Jiali-Xing/breakwater-grpc"
+	"github.com/pennsail/breakwater-grpc"
 	"google.golang.org/grpc"
 )
 
@@ -40,7 +40,7 @@ grpcServer.Serve(listener)
 
 ```go
 import (
-	"github.com/Jiali-Xing/breakwater-grpc"
+	"github.com/pennsail/breakwater-grpc"
 	"google.golang.org/grpc"
 )
 
@@ -79,7 +79,7 @@ BreakwaterD is used to manage overload control when your service makes downstrea
 
 ```go
 import (
-	"github.com/Jiali-Xing/breakwater-grpc"
+	"github.com/pennsail/breakwater-grpc"
 	"google.golang.org/grpc"
 )
 
